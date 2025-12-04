@@ -25,16 +25,12 @@ async def composio_execute(tool_name, params):
     if not COMPOSIO_API_KEY:
         return {"error": "COMPOSIO_API_KEY no configurada"}
 
-    url = "https://backend.composio.dev/api/v2/actions/execute"
+    url = f"https://backend.composio.dev/api/v2/actions/{tool_name}/execute"
     headers = {
         "X-API-Key": COMPOSIO_API_KEY,
         "Content-Type": "application/json"
     }
-    payload = {
-        "actionName": tool_name,
-        "input": params,
-        "entityId": "default"
-    }
+    payload = {"input": params}
 
     try:
         async with aiohttp.ClientSession() as session:
