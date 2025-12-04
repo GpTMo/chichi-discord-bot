@@ -168,7 +168,8 @@ async def enviar_email(interaction: discord.Interaction, destinatario: str, asun
     result = await composio_execute("GMAIL_SEND_EMAIL", {
         "recipient_email": destinatario,
         "subject": asunto,
-        "body": mensaje
+        "body": mensaje,
+        "user_id": "me"
     })
 
     if "error" in result:
@@ -186,7 +187,8 @@ async def email_rapido(interaction: discord.Interaction, email: str, mensaje: st
     result = await composio_execute("GMAIL_SEND_EMAIL", {
         "recipient_email": email,
         "subject": f"Mensaje desde Discord - {interaction.user.name}",
-        "body": f"{mensaje}\n\n---\nEnviado por {interaction.user.name} desde ChiChi Bot"
+        "body": f"{mensaje}\n\n---\nEnviado por {interaction.user.name} desde ChiChi Bot",
+        "user_id": "me"
     })
 
     if "error" in result:
