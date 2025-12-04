@@ -20,18 +20,33 @@ bot = commands.Bot(command_prefix=["!", "/", "chichi ", "ChiChi "], intents=inte
 # HELPER - Ejecutar herramientas de Composio
 # ============================================
 
+import aiohttp
+
 async def composio_execute(tool_name, params):
-    """Ejecuta herramientas de Composio desde Discord"""
+    """Healthcheck previo a ejecución real de la API"""
     if not COMPOSIO_API_KEY:
         return {"error": "COMPOSIO_API_KEY no configurada"}
+    
+    # Check conexión cuenta gmail
+    check_url = "https://backend.composio.dev/api/v1/accounts/list"
+    headers = {"X-API-Key": COMPOSIO_API_KEY, "Content-Type": "application/json"}
+    async with aiohttp.ClientSession() as session:
+        async with session.get(check_url, headers=headers, timeout=15) as resp_chk:
+            if resp_chk.status == 200:
+                chk_data = await resp_chk.json()
+                gmail_acct = None
+                for acct in chk_data.get("accounts", []):
+                    if acct.get("provider") == "gmail" and acct.get("status") == "connected":
+                        gmail_acct = acct
+                        break
+                if not gmail_acct:
+                    return {"error": "No hay cuenta Gmail conectada en Composio. Ve a app.composio.dev/connections y conéctala."}
+                params["account_id"] = gmail_acct["id"]
+            else:
+                return {"error": "No se puede contactar la API de Composio. Status: "+str(resp_chk.status)}
 
-    url = f"https://backend.composio.dev/api/v2/actions/{tool_name}/execute"
-    headers = {
-        "X-API-Key": COMPOSIO_API_KEY,
-        "Content-Type": "application/json"
-    }
-    payload = {"input": params}
-
+    url = f"https://backend.composio.dev/api/v1/actions/{tool_name}/execute"
+    payload = {"input": params, "entityId": "default"}
     try:
         async with aiohttp.ClientSession() as session:
             async with session.post(url, headers=headers, json=payload, timeout=30) as resp:
