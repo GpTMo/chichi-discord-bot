@@ -45,7 +45,7 @@ async def composio_execute(tool_name, params):
             else:
                 return {"error": "No se puede contactar la API de Composio. Status: "+str(resp_chk.status)}
 
-    url = f"https://backend.composio.dev/api/v1/actions/{tool_name}/execute"
+    url = f"https://backend.composio.dev/api/v3/actions/{tool_name}/execute"
     payload = {"input": params, "entityId": "default"}
     try:
         async with aiohttp.ClientSession() as session:
